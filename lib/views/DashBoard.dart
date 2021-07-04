@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:alan_voice/alan_voice.dart';
-import 'package:ewallet_hackathon/failedTransactions/Failed10Transactions.dart';
-import 'package:ewallet_hackathon/failedTransactions/Failed5Transactions.dart';
-import 'package:ewallet_hackathon/failedTransactions/FailedTransactions.dart';
+import 'package:ewallet_hackathon/navigations/Navigations.dart';
 import 'package:ewallet_hackathon/razorPay/RazorPay.dart';
 import 'package:ewallet_hackathon/successTransactions/SuccessTransactions.dart';
 import 'package:flutter/material.dart';
@@ -70,19 +68,19 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
         break;
       case "failed":
         if (mounted) {
-          openFailedTransactionPage();
+          openFailedTransactionPage(context);
           setVisuals("third");
         }
         break;
       case "failed5":
         if (mounted) {
-          openFailed5TransactionPage();
+          openFailed5TransactionPage(context);
           setVisuals("third");
         }
         break;
       case "failed10":
         if (mounted) {
-          openFailed10TransactionPage();
+          openFailed10TransactionPage(context);
           setVisuals("third");
         }
         break;
@@ -144,48 +142,6 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
         print("Command was ${response["command"]}");
         break;
     }
-  }
-
-  fetchUser() async {
-    var response = await http
-        .get(Uri.https("jaysharma8.000webhostapp.com", "getBankUserInfo.php"));
-    if (response.statusCode == 200) {
-      var jsonData = json.decode(response.body)['userInfo'];
-      if (mounted) {
-        setState(() {
-          users = jsonData;
-        });
-      }
-    } else {
-      users = [];
-      print("Loading");
-    }
-  }
-
-  Future<int> convStrToNum(String str) async {
-    var oneTen = <String, num>{
-      'one': 1,
-      'two': 2,
-      'three': 3,
-      'four': 4,
-      'five': 5,
-      'six': 6,
-      'seven': 7,
-      'eight': 8,
-      'nine': 9,
-      'ten': 10,
-      'two hundred': 200,
-    };
-    if (oneTen.keys.contains(str)) {
-      if (oneTen[str] < 52000) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RazorPay(oneTen[str])),
-        );
-        setVisuals("fourth");
-      }
-    }
-    return oneTen[str];
   }
 
   @override
@@ -520,16 +476,6 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
     );
   }
 
-  void openStatementPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SuccessTransactions()),
-    );
-    setVisuals("second");
-  }
-
-  void openPaymentPage(int transAmt) {}
-
   Container avatarWidget(String img, String name) {
     return Container(
       margin: EdgeInsets.only(right: 10.w),
@@ -567,33 +513,46 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
     );
   }
 
-  void setVisuals(String screen) {
-    var visual = "{\"screen\":\"$screen\"}";
-    AlanVoice.setVisualState(visual);
+  fetchUser() async {
+    var response = await http
+        .get(Uri.https("jaysharma8.000webhostapp.com", "getBankUserInfo.php"));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body)['userInfo'];
+      if (mounted) {
+        setState(() {
+          users = jsonData;
+        });
+      }
+    } else {
+      users = [];
+      print("Loading");
+    }
   }
 
-  void openFailedTransactionPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => FailedTransactions()),
-    );
-    setVisuals("third");
-  }
-
-  void openFailed5TransactionPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Failed5Transactions()),
-    );
-    setVisuals("third");
-  }
-
-  void openFailed10TransactionPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Failed10Transactions()),
-    );
-    setVisuals("third");
+  Future<int> convStrToNum(String str) async {
+    var oneTen = <String, num>{
+      'one': 1,
+      'two': 2,
+      'three': 3,
+      'four': 4,
+      'five': 5,
+      'six': 6,
+      'seven': 7,
+      'eight': 8,
+      'nine': 9,
+      'ten': 10,
+      'two hundred': 200,
+    };
+    if (oneTen.keys.contains(str)) {
+      if (oneTen[str] < 52000) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RazorPay(oneTen[str])),
+        );
+        setVisuals("fourth");
+      }
+    }
+    return oneTen[str];
   }
 
   Future<void> sendData(String transactionDate) async {
@@ -718,5 +677,13 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
             ],
           );
         });
+  }
+
+  void openStatementPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SuccessTransactions()),
+    );
+    setVisuals("second");
   }
 }
