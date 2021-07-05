@@ -7,6 +7,7 @@ import 'package:ewallet_hackathon/failedTransactions/FailedTransactions.dart';
 import 'package:ewallet_hackathon/razorPay/RazorPay.dart';
 import 'package:ewallet_hackathon/successTransactions/SuccessTransactions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:foldable_sidebar/foldable_sidebar.dart';
@@ -25,7 +26,11 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
   FSBStatus drawerStatus;
   List users = [];
   List failedTransactions = [];
+  String balanceAmt;
+  bool error, sending, success;
+  String msg;
   String transDate;
+  int transAmt;
   bool _isDialogShowing = false;
 
   String phpUrl =
@@ -35,16 +40,20 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     setupAlanVoice();
-    fetchUserDashBoard();
+    fetchUser();
     setVisuals("first");
+    error = false;
+    sending = false;
+    success = false;
+    msg = "";
   }
 
   setupAlanVoice() {
     AlanVoice.addButton(
-        "cf5e5707f0cb663630fb2385e6de925f2e956eca572e1d8b807a3e2338fdd0dc/stage",
-        buttonAlign: AlanVoice.BUTTON_ALIGN_LEFT);
+      "cf5e5707f0cb663630fb2385e6de925f2e956eca572e1d8b807a3e2338fdd0dc/stage",
+      buttonAlign: AlanVoice.BUTTON_ALIGN_RIGHT,
+    );
     AlanVoice.callbacks.add((command) => _handleCommand(command.data));
-    //Alan Voice Setup
   }
 
   _handleCommand(Map<String, dynamic> response) {
@@ -96,6 +105,22 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
             //print(transDate);
             sendData(transDate);
           }
+          /*else if (transDate.contains("st") | transDate.contains("of")) {
+            transDate = transDate.replaceAll("st", "");
+            transDate = transDate.replaceAll("of", "");
+            Fluttertoast.showToast(msg: transDate);
+            sendData(transDate);
+          } else if (transDate.contains("rd") | transDate.contains("of")) {
+            transDate = transDate.replaceAll("rd", "");
+            transDate = transDate.replaceAll("of", "");
+            Fluttertoast.showToast(msg: transDate);
+            sendData(transDate);
+          } else if (transDate.contains("nd") | transDate.contains("of")) {
+            transDate = transDate.replaceAll("nd", "");
+            transDate = transDate.replaceAll("of", "");
+            Fluttertoast.showToast(msg: transDate);
+            sendData(transDate);
+          }*/
         }
         break;
       case "dialog":
@@ -111,7 +136,14 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
         break;
       case "send_money":
         if (mounted) {
+          //transAmt = response["id"];
+          //Fluttertoast.showToast(msg: response["id"]);
           convStrToNum(response["id"]);
+        }
+        break;
+      case "exit_app":
+        if (mounted) {
+          SystemNavigator.pop();
         }
         break;
       default:
@@ -120,17 +152,60 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
     }
   }
 
+  fetchUser() async {
+    var response = await http
+        .get(Uri.https("jaysharma8.000webhostapp.com", "getBankUserInfo.php"));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body)['userInfo'];
+      if (mounted) {
+        setState(() {
+          users = jsonData;
+        });
+      }
+    } else {
+      users = [];
+      print("Loading");
+    }
+  }
+
+  Future<int> convStrToNum(String str) async {
+    var oneTen = <String, num>{
+      'one': 1,
+      'two': 2,
+      'three': 3,
+      'four': 4,
+      'five': 5,
+      'six': 6,
+      'seven': 7,
+      'eight': 8,
+      'nine': 9,
+      'ten': 10,
+      'two hundred': 200,
+      'fifty': 50,
+      'hundred': 100,
+    };
+    if (oneTen.keys.contains(str)) {
+      if (oneTen[str] < 52000) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RazorPay(oneTen[str])),
+        );
+        setVisuals("fourth");
+      }
+    }
+    return oneTen[str];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: Container(
-        height: 55.0,
-        width: 55.0,
+        height: 30.0,
+        width: 30.0,
         child: FittedBox(
           child: FloatingActionButton(
-            backgroundColor: Colors.transparent,
-            elevation: 0.0,
+            backgroundColor: Color(0xfffcc900).withOpacity(0.4),
             child: Container(
               margin: EdgeInsets.all(17),
               height: 30,
@@ -153,7 +228,6 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       body: FoldableSidebarBuilder(
         //drawerBackgroundColor: Colors.deepOrange,
         drawer: CustomDrawer(
@@ -193,6 +267,16 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
                       )
                     ],
                   ),
+                  if (users.length != 0)
+                    Text(
+                      users[0]['name'].toString(),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    )
+                  else
+                    Container(),
                 ],
               ),
               SizedBox(
@@ -444,6 +528,16 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
     );
   }
 
+  void openStatementPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SuccessTransactions()),
+    );
+    setVisuals("second");
+  }
+
+  void openPaymentPage(int transAmt) {}
+
   Container avatarWidget(String img, String name) {
     return Container(
       margin: EdgeInsets.only(right: 10.w),
@@ -481,20 +575,33 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
     );
   }
 
-  fetchUserDashBoard() async {
-    var response = await http
-        .get(Uri.https("jaysharma8.000webhostapp.com", "getBankUserInfo.php"));
-    if (response.statusCode == 200) {
-      var jsonData = json.decode(response.body)['userInfo'];
-      if (mounted) {
-        setState(() {
-          users = jsonData;
-        });
-      }
-    } else {
-      users = [];
-      print("Loading");
-    }
+  void setVisuals(String screen) {
+    var visual = "{\"screen\":\"$screen\"}";
+    AlanVoice.setVisualState(visual);
+  }
+
+  void openFailedTransactionPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FailedTransactions()),
+    );
+    setVisuals("third");
+  }
+
+  void openFailed5TransactionPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Failed5Transactions()),
+    );
+    setVisuals("third");
+  }
+
+  void openFailed10TransactionPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Failed10Transactions()),
+    );
+    setVisuals("third");
   }
 
   Future<void> sendData(String transactionDate) async {
@@ -522,32 +629,6 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
       failedTransactions = [];
       Fluttertoast.showToast(msg: "No Data Found");
     }
-  }
-
-  Future<int> convStrToNum(String str) async {
-    var oneTen = <String, num>{
-      'one': 1,
-      'two': 2,
-      'three': 3,
-      'four': 4,
-      'five': 5,
-      'six': 6,
-      'seven': 7,
-      'eight': 8,
-      'nine': 9,
-      'ten': 10,
-      'two hundred': 200,
-    };
-    if (oneTen.keys.contains(str)) {
-      if (oneTen[str] < 52000) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => RazorPay(oneTen[str])),
-        );
-        setVisuals("fourth");
-      }
-    }
-    return oneTen[str];
   }
 
   Future _asyncConfirmDialog(BuildContext context, String transAmt,
@@ -645,42 +726,5 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
             ],
           );
         });
-  }
-
-  void openStatementPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SuccessTransactions()),
-    );
-    setVisuals("second");
-  }
-
-  void openFailedTransactionPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => FailedTransactions()),
-    );
-    setVisuals("third");
-  }
-
-  void openFailed5TransactionPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Failed5Transactions()),
-    );
-    setVisuals("third");
-  }
-
-  void openFailed10TransactionPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Failed10Transactions()),
-    );
-    setVisuals("third");
-  }
-
-  void setVisuals(String screen) {
-    var visual = "{\"screen\":\"$screen\"}";
-    AlanVoice.setVisualState(visual);
   }
 }

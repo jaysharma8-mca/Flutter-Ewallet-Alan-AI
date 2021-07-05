@@ -24,6 +24,7 @@ dependencies:
   alan_voice: ^2.3.0
   razorpay_flutter: ^1.2.6
   fluttertoast: ^8.0.7
+  responsive_builder: ^0.4.1
 
 
 dev_dependencies:
@@ -43,8 +44,26 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - asset/images/
-    - asset/
+    - asset/images/account.png
+    - asset/images/avatar1.png
+    - asset/images/avatar2.png
+    - asset/images/avatar3.png
+    - asset/images/avatar4.png
+    - asset/images/cloud.png
+    - asset/images/electricity.png
+    - asset/images/flight.png
+    - asset/images/logo.png
+    - asset/images/menu.png
+    - asset/images/more.png
+    - asset/images/movie.png
+    - asset/images/phone.png
+    - asset/images/receiveMoney.png
+    - asset/images/report.png
+    - asset/images/scanqr.png
+    - asset/images/sendMoney.png
+    - asset/images/sideImg.png
+    - asset/images/tag.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

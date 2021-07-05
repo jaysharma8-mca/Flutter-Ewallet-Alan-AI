@@ -22,6 +22,7 @@ class _FailedTransactionsState extends State<FailedTransactions> {
     super.initState();
     fetchFailedTransaction();
     setupAlanVoice();
+    setVisuals("third");
   }
 
   setupAlanVoice() {
@@ -30,7 +31,7 @@ class _FailedTransactionsState extends State<FailedTransactions> {
 
   _handleCommand(Map<String, dynamic> response) {
     switch (response["command"]) {
-      case "dashboard":
+      case "goback":
         if (mounted) {
           Navigator.of(context).maybePop();
           setVisuals("first");
