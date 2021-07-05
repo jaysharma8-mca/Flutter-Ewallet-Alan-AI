@@ -44,6 +44,7 @@ class _DashBoardState extends State<DashBoard> with TickerProviderStateMixin {
         "cf5e5707f0cb663630fb2385e6de925f2e956eca572e1d8b807a3e2338fdd0dc/stage",
         buttonAlign: AlanVoice.BUTTON_ALIGN_LEFT);
     AlanVoice.callbacks.add((command) => _handleCommand(command.data));
+    //Alan Voice Setup
   }
 
   _handleCommand(Map<String, dynamic> response) {
