@@ -5,6 +5,7 @@
 
    <application
         android:label="EWallet Hackathon"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

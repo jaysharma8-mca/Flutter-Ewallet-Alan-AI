@@ -51,6 +51,7 @@ class _FailedTransactionsState extends State<FailedTransactions> {
         setState(() {
           failedTransactions = jsonData;
           print(failedTransactions);
+          //Fluttertoast.showToast(msg: failedTransactions.toString());
         });
       }
     } else {

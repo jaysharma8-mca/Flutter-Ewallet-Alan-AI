@@ -18,8 +18,26 @@ class _Failed10TransactionsState extends State<Failed10Transactions> {
   @override
   void initState() {
     super.initState();
-    AlanVoice.removeButton();
     fetchFailedTransaction();
+    setupAlanVoice();
+  }
+
+  setupAlanVoice() {
+    AlanVoice.callbacks.add((command) => _handleCommand(command.data));
+  }
+
+  _handleCommand(Map<String, dynamic> response) {
+    switch (response["command"]) {
+      case "dashboard":
+        if (mounted) {
+          Navigator.of(context).maybePop();
+          setVisuals("first");
+        }
+        break;
+      default:
+        print("Command was ${response["command"]}");
+        break;
+    }
   }
 
   fetchFailedTransaction() async {

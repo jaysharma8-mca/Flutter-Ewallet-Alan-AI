@@ -80,9 +80,8 @@ class _RazorPayState extends State<RazorPay> {
   _handleCommand(Map<String, dynamic> response) {
     switch (response["command"]) {
       case "pay":
-        if (mounted) {
-          openCheckout();
-        }
+        openCheckout();
+
         break;
       case "dashboard":
         if (mounted) {
